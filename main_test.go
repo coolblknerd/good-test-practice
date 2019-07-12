@@ -11,25 +11,41 @@ const (
 )
 
 func TestDownload(t *testing.T) {
-	url := "http://www.goinggo.net/feeds/posts/default?alt=rss"
-	statusCode := 200
+
+	var urls = []struct {
+		url        string
+		statusCode int
+	}{
+		{
+			"http://www.goinggo.net/feeds/posts/default?alt=rss",
+			http.StatusOK,
+		},
+		{
+			"http://rss.cnn.com/rss/cnn_topstbadurl.rss",
+			http.StatusNotFound,
+		},
+	}
 
 	t.Log("Given the need to test downloading content.")
 	{
-		t.Logf("\tWhen checking \"%s\" for status code \"%d\"", url, statusCode)
-		{
-			resp, err := http.Get(url)
-			if err != nil {
-				t.Fatal("\t\tShould be able to make the GET call", ballotX, err)
-			}
-			t.Log("\t\tShould be able to make the GET call", checkMark, nil)
+		for _, url := range urls {
 
-			defer resp.Body.Close()
+			t.Logf("\tWhen checking \"%s\" for status code \"%d\"", url.url, url.statusCode)
+			{
+				resp, err := http.Get(url.url)
+				if err != nil {
+					t.Fatal("\t\tShould be able to make the GET call", ballotX, err)
+				}
+				t.Log("\t\tShould be able to make the GET call", checkMark, nil)
 
-			if resp.StatusCode == statusCode {
-				t.Logf("\t\tShould recieve a \"%d\" status, %v", statusCode, checkMark)
-			} else {
-				t.Errorf("\t\tShould recieve a \"%d\" status, %v %v", statusCode, ballotX, resp.StatusCode)
+				defer resp.Body.Close()
+
+				if resp.StatusCode == url.statusCode {
+					t.Logf("\t\tShould recieve a \"%d\" status, %v", url.statusCode, checkMark)
+				} else {
+					t.Errorf("\t\tShould recieve a \"%d\" status, %v %v", url.statusCode, ballotX, resp.StatusCode)
+				}
+
 			}
 		}
 	}
